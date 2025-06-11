@@ -23,7 +23,7 @@ module.exports = {
 
       // Environment
       env: {
-        NODE_ENV: "user",
+        NODE_ENV: "production",
         PORT: 3000,
       },
     },
