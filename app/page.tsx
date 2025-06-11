@@ -14,7 +14,7 @@ export default function Home() {
         />
         <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2 tracking-[-.01em]">
-            I still haven't gotten started by editing
+            I still have not started on editing
           </li>
           <li className="tracking-[-.01em]">
             Save and see your changes instantly. No
