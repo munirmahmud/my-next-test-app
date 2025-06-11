@@ -5,27 +5,33 @@ module.exports = {
       script: "npm",
       args: "start",
       cwd: "/var/www/nextapp/current",
-      interpreter: "/usr/bin/bash",
-      instances: 1,
-      exec_mode: "cluster",
+      interpreter: "none", // run npm directly via system path
+      instances: 1,        // or 0 for auto-clustering (if stateless)
+      exec_mode: "fork",   // "cluster" not needed for npm shell scripts
       watch: false,
-      ignore_watch: ["node_modules", ".git", ".github", "*.log", ".vscode"],
+      ignore_watch: [
+        "node_modules",
+        ".git",
+        ".github",
+        "*.log",
+        ".vscode",
+        "logs"
+      ],
       autorestart: true,
-      max_memory_restart: "2G",
-      node_args: "--max_old_space_size=4096",
+      max_memory_restart: "1G",
 
       // Logging
-      //out_file: "./out.log",
-      //error_file: "./error.log",
-      //merge_logs: true,
-      //log_date_format: "DD-MM HH:mm:ss Z",
-      //log_type: "json",
+      out_file: "/var/log/pm2/nextapp.out.log",
+      error_file: "/var/log/pm2/nextapp.err.log",
+      merge_logs: true,
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
+      log_type: "plain",
 
       // Environment
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
-      },
-    },
+        PORT: 3000
+      }
+    }
   ]
 };
