@@ -41,11 +41,12 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 sh """
-                    ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'rm -rf ${DEPLOY_PATH} && mkdir -p ${DEPLOY_PATH}'
-                    scp -r ${BUILD_DIR}/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+                    rsync -avz --delete ${BUILD_DIR}/ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
                 """
             }
         }
+                    // ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'rm -rf ${DEPLOY_PATH} && mkdir -p ${DEPLOY_PATH}'
+                    // scp -r ${BUILD_DIR}/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
 
         stage('Restart PM2 on Production') {
             steps {
