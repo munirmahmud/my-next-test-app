@@ -2,92 +2,59 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR = "/var/www/html/my-next-test-app"
+        APP_NAME = "my-next-test-app"
+        BUILD_DIR = "next-app"
+        DEPLOY_USER = "deploy"
+        DEPLOY_HOST = "192.168.206.10"
+        DEPLOY_PATH = "/var/www/html/${APP_NAME}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout to Jenkins workspace (default)
                 git 'https://github.com/munirmahmud/my-next-test-app.git'
             }
         }
 
-        stage('Copy Code to Deploy Directory') {
+        stage('Install & Build') {
             steps {
-                // Clean & copy workspace to /var/www/html/my-next-test-app
                 sh '''
-                    sudo rm -rf ${DEPLOY_DIR}
-                    sudo mkdir -p ${DEPLOY_DIR}
-                    sudo cp -r * ${DEPLOY_DIR}
-                    sudo chown -R jenkins:jenkins ${DEPLOY_DIR}
+                    npm install
+                    npm run build
                 '''
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Prepare Artifact') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh 'npm install'
-                }
+                sh '''
+                    rm -rf ${BUILD_DIR}
+                    mkdir ${BUILD_DIR}
+                    cp -r .next public package.json ${BUILD_DIR}
+                '''
             }
         }
 
-        stage('Build App') {
+        stage('Deploy to Production') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh 'npm run build'
-                }
+                sh """
+                    ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'rm -rf ${DEPLOY_PATH} && mkdir -p ${DEPLOY_PATH}'
+                    scp -r ${BUILD_DIR}/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+                """
             }
         }
 
-        stage('Restart with PM2') {
+        stage('Restart PM2 on Production') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh '''
-                        pm2 delete my-next-app || true
-                        pm2 start npm --name "my-next-app" -- start
+                sh """
+                    ssh ${DEPLOY_USER}@${DEPLOY_HOST} '
+                        cd ${DEPLOY_PATH} &&
+                        pm2 delete ${APP_NAME} || true &&
+                        pm2 start npm --name "${APP_NAME}" -- start &&
                         pm2 save
-                    '''
-                }
+                    '
+                """
             }
         }
     }
 }
-
-
-
-
-// pipeline {
-//     agent any
-
-//     // tools {
-//     //     nodejs 'node22'
-//     // }
-
-//     environment {
-//         APP_DIR = "/var/www/m.munirkhan.com"
-//         REPO_URL = "https://github.com/munirmahmud/my-next-test-app.git"
-//     }
-
-//     stages {
-//         stage('Clone Repo') {
-//             steps {
-//                 git url: "${env.REPO_URL}", branch: 'master'
-//             }
-//         }
-
-//         stage('Install Dependencies') {
-//             steps {
-//                 sh 'npm install'
-//             }
-//         }
-
-//         stage('Build App') {
-//             steps {
-//                 sh 'npm run build'
-//                 echo "Build completed successfully."
-//             }
-//         }        
-//     }
-// }
