@@ -1,33 +1,93 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'node22'
-    }
-
     environment {
-        APP_DIR = "/var/www/m.munirkhan.com"
-        REPO_URL = "https://github.com/munirmahmud/my-next-test-app.git"
+        DEPLOY_DIR = "/var/www/html/my-next-test-app"
     }
 
     stages {
-        stage('Clone Repo') {
+        stage('Checkout') {
             steps {
-                git url: "${env.REPO_URL}", branch: 'master'
+                // Checkout to Jenkins workspace (default)
+                git 'https://github.com/munirmahmud/my-next-test-app.git'
+            }
+        }
+
+        stage('Copy Code to Deploy Directory') {
+            steps {
+                // Clean & copy workspace to /var/www/html/my-next-test-app
+                sh '''
+                    sudo rm -rf ${DEPLOY_DIR}
+                    sudo mkdir -p ${DEPLOY_DIR}
+                    sudo cp -r * ${DEPLOY_DIR}
+                    sudo chown -R jenkins:jenkins ${DEPLOY_DIR}
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                dir("${DEPLOY_DIR}") {
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Build App') {
             steps {
-                sh 'npm run build'
-                echo "Build completed successfully."
+                dir("${DEPLOY_DIR}") {
+                    sh 'npm run build'
+                }
             }
-        }        
+        }
+
+        stage('Restart with PM2') {
+            steps {
+                dir("${DEPLOY_DIR}") {
+                    sh '''
+                        pm2 delete my-next-app || true
+                        pm2 start npm --name "my-next-app" -- start
+                        pm2 save
+                    '''
+                }
+            }
+        }
     }
 }
+
+
+
+
+// pipeline {
+//     agent any
+
+//     // tools {
+//     //     nodejs 'node22'
+//     // }
+
+//     environment {
+//         APP_DIR = "/var/www/m.munirkhan.com"
+//         REPO_URL = "https://github.com/munirmahmud/my-next-test-app.git"
+//     }
+
+//     stages {
+//         stage('Clone Repo') {
+//             steps {
+//                 git url: "${env.REPO_URL}", branch: 'master'
+//             }
+//         }
+
+//         stage('Install Dependencies') {
+//             steps {
+//                 sh 'npm install'
+//             }
+//         }
+
+//         stage('Build App') {
+//             steps {
+//                 sh 'npm run build'
+//                 echo "Build completed successfully."
+//             }
+//         }        
+//     }
+// }
