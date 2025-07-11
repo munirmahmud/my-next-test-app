@@ -78,5 +78,21 @@ pipeline {
                 """
             }
         }
+
+        post {
+            success {
+                echo 'Deployment successful!'
+            }
+
+            failure {
+                echo 'Deployment failed!'
+            }
+
+            always {
+                // Clean workspace after pipeline finishes
+                cleanWs()
+            }
+        }
+
     }
 }
