@@ -27,12 +27,6 @@ pipeline {
             steps {
                 sh 'npm run build'
             }
-        }
-
-        stage('Export Static') {
-            steps {
-                sh 'npm run export' // Optional for static export
-            }
-        }
+        }        
     }
 }
