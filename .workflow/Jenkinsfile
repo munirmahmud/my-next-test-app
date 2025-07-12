@@ -28,7 +28,7 @@ pipeline {
         stage('Prepare Artifact') {
             steps {
                 sh '''
-                    echo env.PATH
+                    echo ${env.PATH}
                     rm -rf ${BUILD_DIR}
                     mkdir ${BUILD_DIR}
                     cp -r .next public package.json ${BUILD_DIR}
@@ -52,12 +52,7 @@ pipeline {
 
                     # Final setup on the server
                     ssh ${SSH_USER}@${DEPLOY_SERVER} <<'EOF'
-                        sudo chown -R www-data. ${DEPLOY_PATH}
-                        #cd ${DEPLOY_PATH}
-                        #sudo -u www-data composer install --ignore-platform-reqs
-                        #sudo -u www-data php artisan config:clear
-                        #sudo -u www-data php artisan cache:clear
-                        #sudo -u www-data php artisan migrate
+                        sudo chown -R www-data. ${DEPLOY_PATH} 
                     EOF
                 """
             }
