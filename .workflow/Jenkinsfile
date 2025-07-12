@@ -40,17 +40,17 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 sh """
-                    # Create directory and set ownership
+                    echo "Create directory and set ownership"
                     ssh ${DEPLOY_USER}@${DEPLOY_HOST} '
                         mkdir -p ${DEPLOY_PATH} &&
                         sudo chown -R ${DEPLOY_USER}. ${DEPLOY_PATH}
                     '
 
-                    # Sync files to server
+                    echo "Sync files to server"
                     rsync -avhP -e "ssh -o StrictHostKeyChecking=no" --exclude='.git/' . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
                     #rsync -avz --delete ${BUILD_DIR}/ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
 
-                    # Final setup on the server
+                    echo "Final setup on the server"
                     ssh ${SSH_USER}@${DEPLOY_SERVER} <<'EOF'
                         sudo chown -R www-data. ${DEPLOY_PATH} 
                     EOF
