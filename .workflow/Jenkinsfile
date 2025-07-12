@@ -25,17 +25,17 @@ pipeline {
             }
         }
 
-        stage('Prepare Artifact') {
-            steps {
-                sh '''
-                    echo ${env.PATH}
-                    rm -rf ${BUILD_DIR}
-                    mkdir ${BUILD_DIR}
-                    cp -r .next public package.json ${BUILD_DIR}
-                    pwd
-                '''
-            }
-        }
+        // stage('Prepare Artifact') {
+        //     steps {
+        //         sh '''
+        //             echo "PATH: ${env.PATH}"
+        //             rm -rf ${BUILD_DIR}
+        //             mkdir ${BUILD_DIR}
+        //             cp -r .next public package.json ${BUILD_DIR}
+        //             pwd
+        //         '''
+        //     }
+        // }
 
         stage('Deploy to Production') {
             steps {
